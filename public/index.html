@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>everythingbeok.life</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="container">
+
+    <!-- NAV -->
+    <nav class="nav">
+      <a class="nav-logo" href="#">
+        <span class="nav-avatar" id="navAvatar">Y</span>
+        <span class="nav-logo-text" id="navLogoText">yingyi.ma</span>
+      </a>
+      <div class="nav-right">
+        <a href="#posts">Blog</a>
+        <a href="#about">About</a>
+        <button class="theme-toggle" id="themeToggle" title="切换主题">
+          <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+        <button class="nav-login" id="loginBtn">登录</button>
+      </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-avatar-wrap">
+        <div class="hero-avatar" id="heroAvatar">Y</div>
+      </div>
+      <p class="hero-greeting">Hi, I'm</p>
+      <h1 class="hero-name" id="heroName">yingyi.ma</h1>
+      <p class="hero-bio" id="heroBio">Developer & creator. See further, build cleaner.</p>
+      <div class="hero-links">
+        <a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
+        <a href="mailto:hello@everythingbeok.life">Email</a>
+      </div>
+    </section>
+
+    <!-- ADMIN TOOLBAR -->
+    <div class="toolbar" id="toolbar" style="display:none;">
+      <button id="newStatusBtn">💬 说点什么</button>
+      <button id="newBlogBtn">📝 写文章</button>
+      <button id="editProfileBtn">编辑资料</button>
+    </div>
+
+    <!-- POSTS -->
+    <section class="posts" id="posts">
+      <div class="filter-bar">
+        <button class="filter-btn active" data-filter="all">全部</button>
+        <button class="filter-btn" data-filter="blog">文章</button>
+        <button class="filter-btn" data-filter="status">动态</button>
+      </div>
+      <div class="post-list" id="postList"></div>
+    </section>
+
+    <!-- ABOUT -->
+    <section class="about" id="about">
+      <h2 class="section-title">About</h2>
+      <p class="about-text" id="aboutText">Passionate about building elegant tools and exploring the intersection of AI and software craftsmanship.</p>
+    </section>
+
+    <footer class="footer">&copy; 2025 everythingbeok.life</footer>
+  </div>
+
+  <!-- MODAL: LOGIN -->
+  <div class="modal-mask" id="loginModal">
+    <div class="modal">
+      <button class="modal-x" data-close="loginModal">&times;</button>
+      <div class="login-card active" id="loginVisitor">
+        <div class="login-icon">👋</div>
+        <h3>访客登录</h3>
+        <p class="login-desc">登录后即可点赞评论</p>
+        <input type="text" id="visitorName" placeholder="昵称" />
+        <input type="text" id="visitorContact" placeholder="邮箱或手机号" />
+        <button class="btn" id="visitorSubmit">登录</button>
+        <button class="login-switch" id="toAdmin">管理员入口 &rarr;</button>
+      </div>
+      <div class="login-card" id="loginAdmin">
+        <div class="login-icon">🔐</div>
+        <h3>管理员登录</h3>
+        <input type="text" id="adminUser" placeholder="用户名" value="admin" />
+        <input type="password" id="adminPass" placeholder="密码" />
+        <button class="btn" id="adminSubmit">登录</button>
+        <button class="login-switch" id="toVisitor">&larr; 访客登录</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: STATUS (plain text + emoji) -->
+  <div class="modal-mask" id="statusModal">
+    <div class="modal">
+      <div class="modal-top">
+        <h3>说点什么</h3>
+        <button class="modal-x" data-close="statusModal">&times;</button>
+      </div>
+      <div class="modal-form">
+        <div class="textarea-wrap">
+          <textarea id="statusInput" rows="4" placeholder="此刻的想法..."></textarea>
+          <button class="emoji-trigger" id="statusEmojiBtn" type="button" title="Emoji">😀</button>
+        </div>
+        <div class="emoji-picker" id="statusEmojiPicker" style="display:none;"></div>
+        <div class="form-row">
+          <label class="file-pick">
+            + 图片
+            <input type="file" id="statusImageInput" accept="image/*" multiple hidden />
+          </label>
+        </div>
+        <div class="img-thumbs" id="statusImgThumbs"></div>
+        <button class="btn" id="statusSubmit">发布</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: BLOG (md + title) -->
+  <div class="modal-mask" id="blogModal">
+    <div class="modal modal-lg">
+      <div class="modal-top">
+        <h3>写文章</h3>
+        <button class="modal-x" data-close="blogModal">&times;</button>
+      </div>
+      <div class="modal-form">
+        <input type="text" id="blogTitleInput" placeholder="标题" />
+        <div class="textarea-wrap">
+          <textarea id="blogBodyInput" rows="12" placeholder="支持 Markdown 语法..."></textarea>
+          <button class="emoji-trigger" id="blogEmojiBtn" type="button" title="Emoji">😀</button>
+        </div>
+        <div class="emoji-picker" id="blogEmojiPicker" style="display:none;"></div>
+        <div class="form-row">
+          <label class="file-pick">
+            + 添加图片
+            <input type="file" id="blogImageInput" accept="image/*" multiple hidden />
+          </label>
+          <span class="md-hint">支持 **粗体** *斜体* `代码` [链接](url) 等 Markdown 语法</span>
+        </div>
+        <div class="img-thumbs" id="blogImgThumbs"></div>
+        <button class="btn" id="blogSubmit">发布</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: EDIT PROFILE -->
+  <div class="modal-mask" id="profileModal">
+    <div class="modal">
+      <div class="modal-top">
+        <h3>编辑资料</h3>
+        <button class="modal-x" data-close="profileModal">&times;</button>
+      </div>
+      <div class="modal-form">
+        <label>头像</label>
+        <div class="avatar-upload-row">
+          <div class="avatar-preview" id="avatarPreview">Y</div>
+          <label class="file-pick">
+            选择图片
+            <input type="file" id="avatarFileInput" accept="image/*" hidden />
+          </label>
+        </div>
+        <label>昵称</label>
+        <input type="text" id="profileNameInput" />
+        <label>简介</label>
+        <input type="text" id="profileBioInput" />
+        <button class="btn" id="profileSave">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: POST DETAIL -->
+  <div class="modal-mask" id="detailModal">
+    <div class="modal modal-lg">
+      <div class="modal-top">
+        <h3 id="detailTitle"></h3>
+        <button class="modal-x" data-close="detailModal">&times;</button>
+      </div>
+      <div class="detail-body">
+        <div class="detail-meta" id="detailMeta"></div>
+        <div class="detail-content md-body" id="detailContent"></div>
+        <div class="detail-images" id="detailImages"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="main.js"></script>
+</body>
+</html>
