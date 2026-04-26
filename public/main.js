@@ -300,11 +300,30 @@
     } catch (e) { console.error('Load posts:', e); }
   }
 
+  /* ==== Image compression (avoid Vercel 4.5MB limit) ==== */
+  function compressImage(file, maxWidth = 1200, quality = 0.82) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        let { width, height } = img;
+        if (width > maxWidth) { height = Math.round(height * maxWidth / width); width = maxWidth; }
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        canvas.toBlob(blob => resolve(new File([blob], file.name, { type: 'image/jpeg' })), 'image/jpeg', quality);
+      };
+      img.src = url;
+    });
+  }
+
   /* ==== Upload images ==== */
   async function uploadImages(files) {
     if (!files.length) return [];
+    const compressed = await Promise.all(files.map(f => compressImage(f)));
     const form = new FormData();
-    files.forEach(f => form.append('images', f));
+    compressed.forEach(f => form.append('images', f));
     const data = await api('/upload', { method: 'POST', body: form });
     return data.urls;
   }
@@ -379,8 +398,9 @@
     try {
       // upload avatar if changed
       if (pendingAvatarFile) {
+        const compressed = await compressImage(pendingAvatarFile, 400, 0.9);
         const form = new FormData();
-        form.append('avatar', pendingAvatarFile);
+        form.append('avatar', compressed);
         await api('/profile/avatar', { method: 'POST', body: form });
         pendingAvatarFile = null;
       }
