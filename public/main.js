@@ -544,6 +544,66 @@
     }
   });
 
+  /* ==== Lightbox ==== */
+  const lightbox = document.createElement('div');
+  lightbox.id = 'lightbox';
+  lightbox.innerHTML = `
+    <button class="lb-close">&times;</button>
+    <button class="lb-prev">&#8249;</button>
+    <div class="lb-img-wrap"><img class="lb-img" /></div>
+    <button class="lb-next">&#8250;</button>
+    <div class="lb-counter"></div>
+  `;
+  document.body.appendChild(lightbox);
+
+  let lbImages = [], lbIndex = 0;
+
+  function lbShow(imgs, idx) {
+    lbImages = imgs;
+    lbIndex = idx;
+    lightbox.querySelector('.lb-img').src = lbImages[lbIndex];
+    lightbox.querySelector('.lb-counter').textContent = lbImages.length > 1 ? (lbIndex + 1) + ' / ' + lbImages.length : '';
+    lightbox.querySelector('.lb-prev').style.display = lbImages.length > 1 ? '' : 'none';
+    lightbox.querySelector('.lb-next').style.display = lbImages.length > 1 ? '' : 'none';
+    lightbox.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function lbClose() {
+    lightbox.classList.remove('open');
+    lightbox.querySelector('.lb-img').src = '';
+    document.body.style.overflow = '';
+  }
+
+  lightbox.querySelector('.lb-close').addEventListener('click', lbClose);
+  lightbox.addEventListener('click', e => { if (e.target === lightbox) lbClose(); });
+  lightbox.querySelector('.lb-prev').addEventListener('click', e => {
+    e.stopPropagation();
+    lbIndex = (lbIndex - 1 + lbImages.length) % lbImages.length;
+    lbShow(lbImages, lbIndex);
+  });
+  lightbox.querySelector('.lb-next').addEventListener('click', e => {
+    e.stopPropagation();
+    lbIndex = (lbIndex + 1) % lbImages.length;
+    lbShow(lbImages, lbIndex);
+  });
+  document.addEventListener('keydown', e => {
+    if (!lightbox.classList.contains('open')) return;
+    if (e.key === 'Escape') lbClose();
+    if (e.key === 'ArrowLeft') { lbIndex = (lbIndex - 1 + lbImages.length) % lbImages.length; lbShow(lbImages, lbIndex); }
+    if (e.key === 'ArrowRight') { lbIndex = (lbIndex + 1) % lbImages.length; lbShow(lbImages, lbIndex); }
+  });
+
+  // 监听帖子图片点击
+  document.addEventListener('click', e => {
+    const img = e.target.closest('.post-card-images img, .detail-images img');
+    if (!img) return;
+    const container = img.closest('.post-card-images, .detail-images');
+    const all = Array.from(container.querySelectorAll('img')).map(i => i.src);
+    const idx = Array.from(container.querySelectorAll('img')).indexOf(img);
+    lbShow(all, idx);
+  });
+
   /* ==== Init ==== */
   renderAuth();
   loadProfile();
